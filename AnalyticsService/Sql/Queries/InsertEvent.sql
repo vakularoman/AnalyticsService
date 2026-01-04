@@ -1,0 +1,22 @@
+﻿INSERT INTO analytics.events
+(
+    timestamp,
+    event_type,
+    user_id,
+    session_id,
+    element_id,
+    element_class,
+    duration_seconds,
+    form_name
+)
+VALUES
+(
+    @Timestamp,
+    @EventType,
+    @UserId,
+    @SessionId,
+    @ElementId,
+    @ElementClass,
+    @DurationSeconds,
+    @FormName
+);
