@@ -1,22 +1,22 @@
 ﻿INSERT INTO analytics.events
 (
-    timestamp,
+    date,
     event_type,
-    user_id,
+    vsl_name,
+    buyer_name,
+    fb_id,
     session_id,
-    element_id,
-    element_class,
-    duration_seconds,
-    form_name
+    click_id,
+    video_length
 )
 VALUES
 (
-    @Timestamp,
+    @Date,
     @EventType,
-    @UserId,
+    @VslName,
+    @BuyerName,
+    @FbId,
     @SessionId,
-    @ElementId,
-    @ElementClass,
-    @DurationSeconds,
-    @FormName
+    @ClickId,
+    @VideoLength
 );

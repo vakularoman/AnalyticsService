@@ -1,4 +1,4 @@
-﻿using AnalyticsService.DTO;
+﻿using AnalyticsService.Models;
 using AnalyticsService.Services;
 using AnalyticsService.Services.Background;
 using Microsoft.AspNetCore.Mvc;
@@ -18,22 +18,35 @@ public class AnalyticsEventsController : ControllerBase
         _service = service;
     }
 
-    [HttpGet]
-    public async Task<IActionResult> GetLastEvents([FromQuery] int count = 10)
-    {
-        var events = await _service.GetLastEventsAsync(count);
-        return Ok(events);
-    }
-
     [HttpPost]
-    public IActionResult CreateEvent([FromBody] AnalyticsEventDto dto)
+    public IActionResult CreateEvent([FromBody] AnalyticsEvent analyticsEvent)
     {
-        if (string.IsNullOrWhiteSpace(dto.EventType))
+        if (string.IsNullOrWhiteSpace(analyticsEvent.EventType))
         {
             return BadRequest("EventType is required");
         }
 
-        _queue.Enqueue(dto);
+        _queue.Enqueue(analyticsEvent);
         return Accepted();
+    }
+
+    [HttpGet("statistics")]
+    public async Task<IActionResult> GetVideoStatistics(
+        [FromQuery] string vslName,
+        [FromQuery] DateTime startDate,
+        [FromQuery] DateTime endDate)
+    {
+        if (string.IsNullOrWhiteSpace(vslName))
+        {
+            return BadRequest("vslName is required");
+        }
+
+        if (startDate > endDate)
+        {
+            return BadRequest("startDate must be earlier than endDate");
+        }
+
+        var stats = await _service.GetVideoStatistics(vslName, startDate, endDate);
+        return Ok(stats);
     }
 }

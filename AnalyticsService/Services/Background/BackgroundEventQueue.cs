@@ -1,29 +1,29 @@
-﻿using AnalyticsService.DTO;
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
+using AnalyticsService.Models;
 
 namespace AnalyticsService.Services.Background;
 
 public interface IBackgroundEventQueue
 {
-    void Enqueue(AnalyticsEventDto evt);
+    void Enqueue(AnalyticsEvent evt);
 
-    IReadOnlyList<AnalyticsEventDto> DequeueAll();
+    IReadOnlyList<AnalyticsEvent> DequeueAll();
 }
 
 public class BackgroundEventQueue : IBackgroundEventQueue
 {
-    private readonly ConcurrentQueue<AnalyticsEventDto> _queue = new();
+    private readonly ConcurrentQueue<AnalyticsEvent> _queue = new();
     private readonly SemaphoreSlim _signal = new(0);
 
-    public void Enqueue(AnalyticsEventDto evt)
+    public void Enqueue(AnalyticsEvent evt)
     {
         _queue.Enqueue(evt);
         _signal.Release();
     }
 
-    public IReadOnlyList<AnalyticsEventDto> DequeueAll()
+    public IReadOnlyList<AnalyticsEvent> DequeueAll()
     {
-        var list = new List<AnalyticsEventDto>();
+        var list = new List<AnalyticsEvent>();
         while (_queue.TryDequeue(out var evt))
         {
             list.Add(evt);

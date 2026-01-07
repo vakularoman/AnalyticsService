@@ -1,15 +1,15 @@
 ﻿CREATE TABLE IF NOT EXISTS analytics.events
 (
-    timestamp DateTime64(3) CODEC(Delta, LZ4),
-    event_type LowCardinality(String),
-    user_id UInt64,
-    session_id UUID,
-    element_id Nullable(String),
-    element_class Nullable(String),
-    duration_seconds Nullable(UInt32),
-    form_name Nullable(String)
+    date        DateTime,
+    event_type  LowCardinality(String),
+    vsl_name    LowCardinality(String),
+    buyer_name  LowCardinality(String),
+    fb_id       String,
+    session_id  String,
+    click_id    String,
+    video_length  UInt32
 )
-ENGINE = MergeTree
-PARTITION BY toDate(timestamp)
-ORDER BY (timestamp, session_id, event_type)
-TTL timestamp + INTERVAL 2 YEAR;
+    ENGINE = MergeTree
+PARTITION BY toDate(date)
+ORDER BY (vsl_name, date, event_type)
+TTL date + INTERVAL 1 YEAR;

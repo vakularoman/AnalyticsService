@@ -1,4 +1,4 @@
-﻿using AnalyticsService.DTO;
+﻿using AnalyticsService.Models;
 using AnalyticsService.Services.ClickHouse;
 using Dapper;
 
@@ -7,8 +7,9 @@ namespace AnalyticsService.Services;
 public sealed class AnalyticsEventService
 {
     private readonly ClickHouseConnectionFactory _factory;
+
     private readonly string _insertSql;
-    private readonly string _getLastEventsSql;
+    private readonly string _getVideoStatisticsSql;
 
     public AnalyticsEventService(ClickHouseConnectionFactory factory, IWebHostEnvironment env)
     {
@@ -17,11 +18,11 @@ public sealed class AnalyticsEventService
         var insertFile = Path.Combine(env.ContentRootPath, "Sql/Queries/InsertEvent.sql");
         _insertSql = File.ReadAllText(insertFile);
 
-        var getLastFile = Path.Combine(env.ContentRootPath, "Sql/Queries/GetLastEvents.sql");
-        _getLastEventsSql = File.ReadAllText(getLastFile);
+        var getVideoStatistics = Path.Combine(env.ContentRootPath, "Sql/Queries/GetVideoStatistics.sql");
+        _getVideoStatisticsSql = File.ReadAllText(getVideoStatistics);
     }
 
-    public async Task InsertEventsBatchAsync(IEnumerable<AnalyticsEventDto> events)
+    public async Task InsertEventsBatchAsync(IEnumerable<AnalyticsEvent> events)
     {
         var eventsList = events.ToList();
         if (eventsList.Count == 0)
@@ -29,30 +30,19 @@ public sealed class AnalyticsEventService
             return;
         }
 
-        var parameters = eventsList.Select(e => new
-        {
-            Timestamp = DateTime.UtcNow,
-            e.EventType,
-            e.UserId,
-            e.SessionId,
-            e.ElementId,
-            e.ElementClass,
-            e.DurationSeconds,
-            e.FormName
-        });
-
         await using var conn = _factory.Create();
         await conn.OpenAsync();
 
-        await conn.ExecuteAsync(_insertSql, parameters);
+        await conn.ExecuteAsync(_insertSql, eventsList);
     }
 
-    public async Task<IReadOnlyList<AnalyticsEventDto>> GetLastEventsAsync(int count = 10)
+    public async Task<VideoStatistics?> GetVideoStatistics(string vslName, DateTime startDate, DateTime endDate)
     {
         await using var conn = _factory.Create();
         await conn.OpenAsync();
 
-        var events = await conn.QueryAsync<AnalyticsEventDto>(_getLastEventsSql, new { Count = count });
-        return events.ToList();
+        var result = await conn.QueryAsync<VideoStatistics>(_getVideoStatisticsSql,
+            new { VslName = vslName, StartDate = startDate, EndDate = endDate });
+        return result.FirstOrDefault();
     }
 }
