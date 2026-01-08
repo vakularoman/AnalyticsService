@@ -10,7 +10,7 @@ retention_expanded AS (
     SELECT arrayJoin(range(0, view_duration + 1)) AS elapsed_second
     FROM (SELECT view_duration FROM filtered))
 SELECT
-    (SELECT COUNT(*) FROM filtered) AS TotalSessions,
+    (SELECT COUNT(*) FROM filtered) AS TotalViews,
     (SELECT COUNTIf(view_duration >= video_length) FROM filtered) AS CompletedSessions,
     (SELECT COUNTIf(view_duration >= video_length) / COUNT(*) FROM filtered) AS CompletionRate,
     (SELECT AVG(view_duration) FROM filtered) AS AvgViewDuration,

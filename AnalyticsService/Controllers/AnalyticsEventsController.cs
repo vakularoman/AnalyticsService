@@ -49,4 +49,16 @@ public class AnalyticsEventsController : ControllerBase
         var stats = await _service.GetVideoStatistics(vslName, startDate, endDate);
         return Ok(stats);
     }
+
+    [HttpGet("get-vsl")]
+    public async Task<IActionResult> GetVlsByBuyerName([FromQuery] string[] buyerNames)
+    {
+        if (buyerNames.Length == 0)
+        {
+            return BadRequest("At least one buyerName is required");
+        }
+
+        var vslNames = await _service.GetVlsByBuyerName(buyerNames);
+        return Ok(vslNames);
+    }
 }

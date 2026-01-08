@@ -5,12 +5,19 @@ ORDER BY (vsl_name, play_time)
 AS
 SELECT
     vsl_name,
-    MIN(date) FILTER (WHERE event_type='play') AS play_time,
-    MAX(date) FILTER (WHERE event_type='exit') AS exit_time,
-    MAX(video_length) AS video_length,
-    toUInt32(MAX(date) FILTER (WHERE event_type='exit') - MIN(date) FILTER (WHERE event_type='play')) AS view_duration,
-    (MIN(date) FILTER (WHERE event_type='play') IS NOT NULL
-        AND MAX(date) FILTER (WHERE event_type='exit') IS NOT NULL) AS is_valid,
+    play_time,
+    exit_time,
+    video_length,
+    toUInt32(exit_time - play_time) AS view_duration,
+    (play_time != toDateTime('1970-01-01') AND exit_time != toDateTime('1970-01-01')) AND play_time <= exit_time AS is_valid,
     buyer_name
-FROM analytics.events
-GROUP BY session_id, vsl_name, buyer_name;
+    FROM (
+         SELECT
+             vsl_name,
+             buyer_name,
+             MIN(date) FILTER (WHERE event_type='play') AS play_time,
+             MAX(date) FILTER (WHERE event_type='exit') AS exit_time,
+             MAX(video_length) AS video_length
+         FROM analytics.events
+         GROUP BY session_id, vsl_name, buyer_name
+     ) AS t;

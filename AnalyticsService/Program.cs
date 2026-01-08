@@ -4,6 +4,13 @@ using AnalyticsService.Services.ClickHouse;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.NumberHandling = 
+            System.Text.Json.Serialization.JsonNumberHandling.AllowNamedFloatingPointLiterals;
+    });
+
 // Add services to the container.
 builder.Services.AddSingleton<ClickHouseConnectionFactory>();
 builder.Services.AddSingleton<ClickHouseSchemaInitializer>();

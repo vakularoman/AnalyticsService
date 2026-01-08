@@ -2,7 +2,7 @@
 
 public sealed class VideoStatistics
 {
-    public long TotalSessions { get; init; }
+    public long TotalViews { get; init; }
 
     public long CompletedSessions { get; init; }
 

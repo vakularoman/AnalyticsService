@@ -23,8 +23,9 @@ public class BackgroundEventQueue : IBackgroundEventQueue
 
     public IReadOnlyList<AnalyticsEvent> DequeueAll()
     {
-        var list = new List<AnalyticsEvent>();
-        while (_queue.TryDequeue(out var evt))
+        const int batchMaxSize = 1_000;
+        var list = new List<AnalyticsEvent>(batchMaxSize);
+        while (_queue.TryDequeue(out var evt) && list.Count < batchMaxSize)
         {
             list.Add(evt);
         }
