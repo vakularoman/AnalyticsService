@@ -65,10 +65,13 @@ public sealed class AnalyticsEventService
 
     public async Task<VideoStatistics?> GetVideoStatistics(string vslName, DateTime startDate, DateTime endDate)
     {
-        var result = await QueryAsync<VideoStatistics>(_getVideoStatisticsSql,
+        var queryResult = await QueryAsync<VideoStatistics>(_getVideoStatisticsSql,
             new { VslName = vslName, StartDate = startDate, EndDate = endDate });
+        
+        var statistics = queryResult.FirstOrDefault();
+        statistics?.CalculateGraphsStatistics();
 
-        return result.FirstOrDefault();
+        return statistics;
     }
 
     public async Task<ICollection<string>> GetVlsByBuyerName(ICollection<string> buyerNames)
