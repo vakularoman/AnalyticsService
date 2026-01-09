@@ -12,4 +12,4 @@
     ENGINE = MergeTree
 PARTITION BY toDate(date)
 ORDER BY (vsl_name, date, event_type)
-TTL date + INTERVAL 1 YEAR;
+TTL date + INTERVAL 3 MONTH;

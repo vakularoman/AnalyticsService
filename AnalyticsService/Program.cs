@@ -22,7 +22,7 @@ builder.Services.AddControllers();
 var app = builder.Build();
 
 app.MapGet("/", () => "Hello World!");
-app.Urls.Add("http://0.0.0.0:80");
+//app.Urls.Add("http://0.0.0.0:80");
 // Configure the HTTP request pipeline.
 app.UseHttpsRedirection();
 app.UseAuthorization();

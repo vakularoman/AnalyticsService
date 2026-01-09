@@ -5,7 +5,7 @@ namespace AnalyticsService.Services.Background;
 
 public interface IBackgroundEventQueue
 {
-    void Enqueue(AnalyticsEvent evt);
+    void Enqueue(List<AnalyticsEvent> evt);
 
     IReadOnlyList<AnalyticsEvent> DequeueAll();
 }
@@ -15,9 +15,12 @@ public class BackgroundEventQueue : IBackgroundEventQueue
     private readonly ConcurrentQueue<AnalyticsEvent> _queue = new();
     private readonly SemaphoreSlim _signal = new(0);
 
-    public void Enqueue(AnalyticsEvent evt)
+    public void Enqueue(List<AnalyticsEvent> evnts)
     {
-        _queue.Enqueue(evt);
+        foreach (var evt in evnts)
+        {
+            _queue.Enqueue(evt);
+        }
         _signal.Release();
     }
 

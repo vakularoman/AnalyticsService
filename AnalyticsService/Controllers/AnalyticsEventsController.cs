@@ -19,14 +19,9 @@ public class AnalyticsEventsController : ControllerBase
     }
 
     [HttpPost]
-    public IActionResult CreateEvent([FromBody] AnalyticsEvent analyticsEvent)
+    public IActionResult PostEvents([FromBody] List<AnalyticsEvent> analyticsEvents)
     {
-        if (string.IsNullOrWhiteSpace(analyticsEvent.EventType))
-        {
-            return BadRequest("EventType is required");
-        }
-
-        _queue.Enqueue(analyticsEvent);
+        _queue.Enqueue(analyticsEvents);
         return Accepted();
     }
 
