@@ -7,6 +7,8 @@ public interface IBackgroundEventQueue
 {
     void Enqueue(List<AnalyticsEvent> evt);
 
+    void Enqueue(AnalyticsEvent evt);
+
     IReadOnlyList<AnalyticsEvent> DequeueAll();
 }
 
@@ -21,6 +23,12 @@ public class BackgroundEventQueue : IBackgroundEventQueue
         {
             _queue.Enqueue(evt);
         }
+        _signal.Release();
+    }
+
+    public void Enqueue(AnalyticsEvent evt)
+    {
+        _queue.Enqueue(evt);
         _signal.Release();
     }
 

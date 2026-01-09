@@ -18,10 +18,17 @@ public class AnalyticsEventsController : ControllerBase
         _service = service;
     }
 
-    [HttpPost]
-    public IActionResult PostEvents([FromBody] List<AnalyticsEvent> analyticsEvents)
+    [HttpPost("batch")]
+    public IActionResult PostBatchEvents([FromBody] List<AnalyticsEvent> analyticsEvents)
     {
         _queue.Enqueue(analyticsEvents);
+        return Accepted();
+    }
+
+    [HttpPost]
+    public IActionResult PostEvent([FromBody] AnalyticsEvent analyticsEvent)
+    {
+        _queue.Enqueue(analyticsEvent);
         return Accepted();
     }
 

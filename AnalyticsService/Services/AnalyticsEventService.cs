@@ -1,5 +1,6 @@
 ﻿using AnalyticsService.Models;
 using ClickHouse.Driver.ADO;
+using ClickHouse.Driver.Copy;
 using Dapper;
 using ClickHouseConnectionFactory = AnalyticsService.Services.ClickHouse.ClickHouseConnectionFactory;
 
@@ -9,7 +10,6 @@ public sealed class AnalyticsEventService
 {
     private readonly ClickHouseConnectionFactory _factory;
 
-    private readonly string _insertSql;
     private readonly string _getVideoStatisticsSql;
     private readonly string _getVslBuyBuyerNameSql;
 
@@ -17,7 +17,6 @@ public sealed class AnalyticsEventService
     {
         _factory = factory;
 
-        _insertSql = LoadSql(env, "InsertEvent.sql");
         _getVideoStatisticsSql = LoadSql(env, "GetVideoStatistics.sql");
         _getVslBuyBuyerNameSql = LoadSql(env, "GetVslByBuyerName.sql");
     }
@@ -38,18 +37,30 @@ public sealed class AnalyticsEventService
     private Task<IReadOnlyList<T>> QueryAsync<T>(string sql, object? parameters = null)
         => ExecuteWithConnectionAsync(async conn => (await conn.QueryAsync<T>(sql, parameters)).ToList() as IReadOnlyList<T>);
 
-    private Task<int> ExecuteAsync(string sql, object? parameters = null)
-        => ExecuteWithConnectionAsync(conn => conn.ExecuteAsync(sql, parameters));
-
-    public Task InsertEventsBatchAsync(IEnumerable<AnalyticsEvent> events)
+    public async Task InsertEventsBatchAsync(IEnumerable<AnalyticsEvent> events)
     {
-        var eventsList = events.ToList();
-        if (!eventsList.Any())
-        {
-            return Task.CompletedTask;
-        }
+        await using var connection = _factory.Create();
+        await connection.OpenAsync();
 
-        return ExecuteAsync(_insertSql, eventsList);
+        using var bulkCopy = new ClickHouseBulkCopy(connection)
+        {
+            DestinationTableName = "analytics.events",
+            BatchSize = 1_000,
+        };
+
+        await bulkCopy.InitAsync();
+        var rows = events.Select(e => new object[]
+        {
+            e.Date,
+            e.EventType,
+            e.VslName,
+            e.BuyerName,
+            e.FbId,
+            e.SessionId,
+            e.ClickId,
+            e.VideoLength,
+        });
+        await bulkCopy.WriteToServerAsync(rows);
     }
 
     public async Task<VideoStatistics?> GetVideoStatistics(string vslName, DateTime startDate, DateTime endDate)

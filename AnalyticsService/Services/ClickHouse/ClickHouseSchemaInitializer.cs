@@ -23,7 +23,6 @@ public sealed class ClickHouseSchemaInitializer
         var sqlFiles = new[]
         {
             Path.Combine(_env.ContentRootPath, "Sql/Schema/InitializeEventsTable.sql"),
-            Path.Combine(_env.ContentRootPath, "Sql/Schema/CreateVideoSessionsMV.sql")
         };
 
         foreach (var file in sqlFiles)
