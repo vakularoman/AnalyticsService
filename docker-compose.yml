@@ -22,6 +22,8 @@ services:
       timeout: 5s
       retries: 10
       start_period: 30s
+    networks:
+      - internal
 
   webapp:
     build:
@@ -34,6 +36,20 @@ services:
     depends_on:
       clickhouse:
         condition: service_healthy
+    environment:
+      Loki__Uri: https://traffic-hunters-crm.com
+      Loki__Login: loki
+      Loki__Password: LokiPass2026
+    networks:
+      - internal
+      - monitoring
+
+networks:
+  internal:
+    driver: bridge
+  monitoring:
+    external: true
+    name: monitoring
 
 volumes:
   clickhouse_data:
