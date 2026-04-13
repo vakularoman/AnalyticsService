@@ -55,7 +55,7 @@ app.UseSerilogRequestLogging();
 
 app.UseAuthorization();
 app.MapControllers();
-app.MapHealthChecks("/health");
+app.MapHealthChecks("/api/events/health");
 
 await InitializeDatabaseAsync(app);
 
